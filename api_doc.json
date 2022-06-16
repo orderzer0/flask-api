@@ -1,0 +1,62 @@
+[
+ {
+   "Request": "GET",
+   "Endpoint": "/",
+   "Code response": 200,
+   "Description": "Get html documentation page"
+ },
+ {
+   "Request": "GET",
+   "Endpoint": "/api",
+   "Code response": 200,
+   "Description": "Get json documentation"
+ },
+ {
+   "Request": "GET",
+   "Endpoint": "/api/students",
+   "Code response": 200,
+   "Description": "Get information about all students"
+ },
+ {
+   "Request": "POST",
+   "Endpoint": "/api/students/add",
+   "Code response": 201,
+   "Description": "Add student to system. Params: name, email, age, cellphone"
+ },
+ {
+   "Request": "GET",
+   "Endpoint": "/api/students/get/{id}",
+   "Code response": 200,
+   "Description": "Get information about specific user by id"
+ },
+ {
+   "Request": "PUT",
+   "Endpoint": "/api/students/change/{id}",
+   "Code response": 200,
+   "Description": "Change information about specific user by id"
+ },
+ {
+   "Request": "PATCH",
+   "Endpoint": "/api/students/modify/{id}",
+   "Code response": 200,
+   "Description": "Modify information about specific user by id"
+ },
+ {
+   "Request": "DELETE",
+   "Endpoint": "/api/students/delete/{id}",
+   "Code response": 204,
+   "Description": "Delete student"
+ },
+ {
+   "Request": "GET",
+   "Endpoint": "/api/health-check/ok",
+   "Code response": 200,
+   "Description": "Ok self-check"
+ },
+ {
+   "Request": "GET",
+   "Endpoint": "/api/health-check/bad",
+   "Code response": 500,
+   "Description": "Bad self-check"
+ }
+]

@@ -1,7 +1,7 @@
 from asyncio.proactor_events import _ProactorBasePipeTransport
 import os
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template, send_file 
 from flask_sqlalchemy import SQLAlchemy
 import dotenv
 from sqlalchemy import create_engine
@@ -57,11 +57,11 @@ class StudentSchema(Schema):
 
 @app.route('/', methods = ['GET'])
 def home():
-    return '<p>Hello from students API!</p>', 200
+    return render_template("index.html"), 200
 
 @app.route('/api', methods = ['GET'])
 def api_main():
-    return jsonify('Hello, World!'), 200
+    return send_file('api_doc.json'), 200
 
 @app.route('/api/students', methods=['GET'])
 def get_all_students():
@@ -90,6 +90,60 @@ def add_student():
     serializer = StudentSchema()
     data = serializer.dump(new_student)
     return jsonify(data), 201
+
+@app.route('/api/students/modify/<int:id>', methods = ['PATCH'])
+def modify_student(id):
+    student = Student.get_by_id(id)
+    student_json = request.get_json()
+    if student_json.get('name'):
+        student.name = student_json.get('name')
+    if student_json.get('email'):
+        student.email = student_json.get('email')
+    if student_json.get('age'):
+        student.age = student_json.get('age')
+    if student_json.get('cellphone'):
+        student.cellphone = student_json.get('cellphone')
+    try:
+        db.session.commit()
+    except:
+        return jsonify("Something went wrong!"), 500
+    serializer = StudentSchema()
+    data = serializer.dump(student)
+    return jsonify(data), 200
+
+@app.route('/api/students/change/<int:id>', methods = ['PUT'])
+def change_student(id):
+    student = Student.get_by_id(id)
+    student_json = request.get_json()
+    if not student_json:
+        return {'message': 'Wrong data'}, 400
+    student.name=student_json.get('name'),
+    student.email=student_json.get('email'),
+    student.age=student_json.get('age'),
+    student.cellphone=student_json.get('cellphone')
+    try:
+        db.session.commit()
+    except:
+        return jsonify("Something went wrong!"), 500
+    serializer = StudentSchema()
+    data = serializer.dump(student)
+    return data, 200
+
+@app.route('/api/students/delete/<int:id>', methods = ['DELETE'])
+def del_student(id):
+    student = Student.get_by_id(id)
+    if not student:
+        return "", 404
+    student.delete()
+    return "", 204
+
+@app.route('/api/health-check/ok', methods = ['GET'])
+def health_check_ok():
+    return {'message': 'Ok'}, 200
+
+@app.route('/api/health-check/bad', methods = ['GET'])
+def health_check_bad():
+    return "", 500
 
 if __name__ == '__main__':
     if not database_exists(engine.url):
