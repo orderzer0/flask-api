@@ -61,7 +61,7 @@ class StudentSchema(Schema):
 
 @app.route('/api', methods = ['GET'])
 def api_main():
-    return jsonify('Hello, World!'), 200
+    return jsonify('This API hepls ou to fill mysql database using some methods like:/nPOST, PUT, PATCH, GET. With method POST, PUT, PATCH you receive answer code 201 which show you the data you want to add. With GET you receive code 200 which shows you data by request'), 200
  
 @app.route('/api/students', methods=['GET'])
 def get_all_students():
