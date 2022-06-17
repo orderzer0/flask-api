@@ -1,9 +1,9 @@
-from asyncio.proactor_events import _ProactorBasePipeTransport
 import os
 
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 import dotenv
+from pymysql import NULL
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 from marshmallow import Schema, fields
@@ -35,7 +35,7 @@ class Student(db.Model):
     @classmethod
     def get_all(cls):
         return cls.query.all()
-
+    
     @classmethod
     def get_by_id(cls, id):
         return cls.query.get_or_404(id)
@@ -48,6 +48,10 @@ class Student(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def change(self):
+        db.session.change(self)
+        db.session.commit()
+
 class StudentSchema(Schema):
     id = fields.Integer()
     name = fields.Str()
@@ -55,14 +59,10 @@ class StudentSchema(Schema):
     age = fields.Integer()
     cellphone = fields.Str()
 
-@app.route('/', methods = ['GET'])
-def home():
-    return '<p>Hello from students API!</p>', 200
-
 @app.route('/api', methods = ['GET'])
 def api_main():
     return jsonify('Hello, World!'), 200
-
+ 
 @app.route('/api/students', methods=['GET'])
 def get_all_students():
     students = Student.get_all()
@@ -76,7 +76,7 @@ def get_student(id):
     serializer = StudentSchema()
     response = serializer.dump(student_info)
     return jsonify(response), 200
-
+ 
 @app.route('/api/students/add', methods = ['POST'])
 def add_student():
     json_data = request.get_json()
@@ -90,6 +90,55 @@ def add_student():
     serializer = StudentSchema()
     data = serializer.dump(new_student)
     return jsonify(data), 201
+
+#added modify feature
+@app.route('/api/students/modify/<int:id>', methods=['PATCH'])
+def edit_student(id):
+    json_data = request.get_json()
+    cur_student = Student.get_by_id(id)
+    if json_data.get('name'):
+        cur_student.name = json_data.get('name')
+    if json_data.get('email'):
+        cur_student.email = json_data.get('email')
+    if json_data.get('age'):
+        cur_student.age = json_data.get('age')
+    if json_data.get('cellphone'):
+        cur_student.age = json_data.get('cellphone')
+
+    cur_student.save()
+    serializer = StudentSchema()
+    response = serializer.dump(cur_student)
+    return jsonify(response), 201
+
+#added change feature
+@app.route('/api/students/change/<int:id>', methods=['PUT'])
+def change_student(id):
+    json_data = request.get_json()
+    cur_student = Student.get_by_id(id)
+    new_data = Student(
+        name= json_data.get('name'),
+        email=json_data.get('email'),
+        age=json_data.get('age'),
+        cellphone=json_data.get('cellphone')
+    )
+    cur_student.name = new_data.name
+    cur_student.email = new_data.email
+    cur_student.age = new_data.age
+    cur_student.cellphone = new_data.cellphone
+
+    cur_student.save()
+    serializer = StudentSchema()
+    response = serializer.dump(cur_student)
+    return jsonify(response), 201
+
+#added delete feature
+@app.route('/api/students/delete/<int:id>', methods=['POST'])
+def del_student(id):
+    student_info = Student.get_by_id(id)
+    student_info.delete()
+    serializer = StudentSchema()
+    response = serializer.dump(student_info)
+    return jsonify(response), 201
 
 if __name__ == '__main__':
     if not database_exists(engine.url):
