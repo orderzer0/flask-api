@@ -6,3 +6,4 @@ sqlalchemy
 sqlalchemy_utils
 marshmallow-sqlalchemy
 cryptography
+flask-apispec==0.11.0
